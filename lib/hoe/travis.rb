@@ -182,7 +182,8 @@ module Hoe::Travis
   # .hoerc.
 
   def travis_versions
-    if have_gem? 'ZenTest' then
+    if have_gem? 'ZenTest' and
+       File.exist?(File.expand_path('~/.multiruby')) then
       `multiruby -v` =~ /^Passed: (.*)/
 
         $1.split(', ').map do |ruby_release|

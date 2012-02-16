@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'hoe/travis'
 require 'tmpdir'
+require 'fileutils'
 
 class TestHoeTravis < MiniTest::Unit::TestCase
 
@@ -15,10 +16,12 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     @hoe.extend Hoe::Travis
 
     @editor = ENV['EDITOR']
+    @home   = ENV['HOME']
   end
 
   def teardown
     ENV['EDITOR'] = @editor
+    ENV['HOME']   = @home
   end
 
   def test_have_gem_eh
@@ -35,8 +38,6 @@ class TestHoeTravis < MiniTest::Unit::TestCase
   end
 
   def test_travis_fake_config
-    home = ENV['HOME']
-
     Dir.mktmpdir do |path|
       ENV['HOME'] = path
 
@@ -52,8 +53,6 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
       assert_equal expected, YAML.load_file(fake_config)
     end
-  ensure
-    ENV['HOME'] = home
   end
 
   def test_travis_notifications
@@ -82,6 +81,29 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     def @hoe.have_gem?(name) false end
 
     assert_equal %w[1.8.7 1.9.2 1.9.3], @hoe.travis_versions
+  end
+
+  def test_travis_versions_multiruby
+    def @hoe.have_gem?(name) true end
+    def @hoe.`(command) "Passed: 1.6.8, 1.8.0" end
+
+    Dir.mktmpdir do |path|
+      ENV['HOME'] = path
+
+      FileUtils.touch File.join(path, '.multiruby')
+
+      assert_equal %w[1.6.8 1.8.0], @hoe.travis_versions
+    end
+  end
+
+  def test_travis_versions_multiruby_unused
+    def @hoe.have_gem?(name) true end
+
+    Dir.mktmpdir do |path|
+      ENV['HOME'] = path
+
+      assert_equal %w[1.8.7 1.9.2 1.9.3], @hoe.travis_versions
+    end
   end
 
   def test_travis_yml_check
