@@ -1,0 +1,108 @@
+= hoe-travis
+
+home :: https://github.com/drbrain/hoe-travis
+rdoc :: http://docs.seattlerb.org/hoe-travis
+bugs :: https://github.com/drbrain/hoe-travis/issues
+
+== Description
+
+hoe-travis is a Hoe plugin that allows your gem to gain maximum benefit from
+http://travis-ci.org.  The plugin contains a <code>.travis.yml</code>
+generator and a pre-defined rake task which runs the tests and ensures your
+manifest file is correct.
+
+With hoe-travis, additional checks and setup can be added with
+locally-verifiable rake tasks instead of committing and pushing a change,
+waiting for travis to run your tests, then trying a new commit if you didn't
+fix the problem.
+
+== Features
+
+* .travis.yml generation task
+* Pre-defined rake tasks which are run by travis-ci
+* Easy to hook up rake tasks for additional travis-ci setup and checks
+
+== Install
+
+  sudo gem install hoe-travis
+
+== Synopsis
+
+Add hoe-travis as a plugin to your Rakefile:
+
+  Hoe.plugin :travis
+
+Then generate a .travis.yml
+
+  $ rake travis:generate
+
+This will bring up your EDITOR with your travis.yml for any desired tweaks.
+Save the file when you're done, then check in your .travis.yml.  For further
+details of how the configuration is generated see Hoe::Travis@Config
+
+(If you don't have the EDITOR environment variable set to your favorite
+editor, please do so.  Note that some editors may need extra flags to wait for
+files to be edited.  For MacVIM, <code>export EDITOR="mvim
+--remote-wait"</code> will wait for the file to be closed before returning.)
+
+If you would like to make future changes to your .travis.yml you can run:
+
+  $ rake travis:edit
+
+Which, like <code>travis:generate</code>, will bring up your EDITOR with your
+.travis.yml.  When you've saved the file the changes will be checked by
+travis-lint before writing back to .travis.yml and give you a chance to
+correct them.
+
+If you've edited your .travis.yml by hand you can run:
+
+  $ rake travis:check
+
+to check it.
+
+Testing your travis-ci setup is easy with hoe-travis.  You can run:
+
+  $ rake travis
+
+to run the same checks travis-ci will.  By default this includes running the
+tests and ensuring the Manifest.txt file is complete.  There is also the
+before script:
+
+  $ rake travis:before
+
+Which will run the setup tasks needed for your project.
+
+== Developers
+
+After checking out the source, run:
+
+  $ rake newb
+
+This task will install any missing dependencies, run the tests/specs,
+and generate the RDoc.
+
+== License
+
+(The MIT License)
+
+Copyright (c) Eric Hodel
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

@@ -1,0 +1,7 @@
+.autotest
+History.txt
+Manifest.txt
+README.rdoc
+Rakefile
+lib/hoe/travis.rb
+test/test_hoe_travis.rb
