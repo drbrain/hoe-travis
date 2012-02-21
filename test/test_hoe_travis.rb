@@ -148,7 +148,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     ENV['EDITOR'] = "cat > /dev/null < "
 
     Tempfile.open 'travis' do |io|
-      io.write "travis"
+      io.write "travis: woo"
       io.rewind
 
       e = assert_raises SystemExit do
