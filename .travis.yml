@@ -1,6 +1,5 @@
 ---
 before_script:
-- gem install hoe-travis --no-rdoc --no-ri
 - rake travis:before
 language: ruby
 notifications:

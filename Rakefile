@@ -1,5 +1,8 @@
 # -*- ruby -*-
 
+# Bootstrap for travis-ci
+$LOAD_PATH.unshift 'lib'
+
 require 'rubygems'
 require 'hoe'
 
