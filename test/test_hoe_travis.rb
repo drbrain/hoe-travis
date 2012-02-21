@@ -166,9 +166,9 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
     Dir.mktmpdir do |path|
       Dir.chdir path do
-        travis_yml = @hoe.travis_yml_generate
+        travis_yml = YAML.load @hoe.travis_yml_generate
 
-        expected = <<-TRAVIS_YML
+        expected = YAML.load <<-TRAVIS_YML
 ---
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri

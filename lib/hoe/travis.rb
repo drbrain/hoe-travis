@@ -70,6 +70,14 @@ module Hoe::Travis
 
   VERSION = '1.0'
 
+  YAML_EXCEPTIONS = if defined?(Psych) then # :nodoc:
+                      [Psych::Exception, Psych::SyntaxError]
+                    else
+                      [YAML::Error]
+                    end
+
+  YAML_EXCEPTIONS << ArgumentError
+
   Hoe::DEFAULT_CONFIG['travis'] = {
     'before_script' => [
       'gem install hoe-travis --no-rdoc --no-ri',
@@ -216,7 +224,7 @@ module Hoe::Travis
     end
 
     false
-  rescue ArgumentError, Psych::SyntaxError => e
+  rescue *YAML_EXCEPTIONS => e
     warn "invalid YAML in travis.yml file at #{path}: #{e.message}"
 
     return false
