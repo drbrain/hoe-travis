@@ -136,6 +136,7 @@ module Hoe::Travis
       desc "Run by travis-ci before your running the default checks"
       task :before => %w[
         check_extra_deps
+        install_plugins
       ]
 
       desc "Runs travis-lint on your .travis.yml"
