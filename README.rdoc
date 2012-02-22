@@ -38,7 +38,8 @@ Then generate a .travis.yml
 
 This will bring up your EDITOR with your travis.yml for any desired tweaks.
 Save the file when you're done, then check in your .travis.yml.  For further
-details of how the configuration is generated see Hoe::Travis@Config
+details of how the configuration is generated see Hoe::Travis@Setup and
+Hoe::Travis@Hoe+Configuration.
 
 (If you don't have the EDITOR environment variable set to your favorite
 editor, please do so.  Note that some editors may need extra flags to wait for
@@ -71,6 +72,10 @@ before script:
   $ rake travis:before
 
 Which will run the setup tasks needed for your project.
+
+You can also enable and disable travis-ci using <code>rake
+travis:enable</code> and <code>rake travis:disable</code>.  See
+Hoe::Travis@Setup for details.
 
 == Developers
 

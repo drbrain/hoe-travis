@@ -1,10 +1,36 @@
 require 'hoe'
 require 'tempfile'
+require 'net/http'
+require 'uri'
 
 ##
 # The travis plugin for Hoe manages your .travis.yml file for you in a clean
 # and extensible way you can use across projects or by through integration
 # with other Hoe plugins.
+#
+# == Setup
+#
+# The travis plugin can be used without this setup.  By following these
+# instructions you can enable and disable a travis-ci hook for your ruby
+# projects from rake through <code>rake travis:enable</code> and <code>rake
+# travis:disable</code>.
+#
+# === Github API access
+#
+# Set your github username and password in your ~/.gitconfig:
+#
+#   git config --global github.user username
+#   git config --global github.password password
+#   chmod 600 ~/.gitconfig
+#
+# === Travis token
+#
+# As of this writing there isn't an easy way to retrieve the travis token
+# programmatically.  You can find your travis token at
+# http://travis-ci.org/profile underneath your github username and email
+# address.
+#
+# To set this in your hoerc run `rake config_hoe` and edit the "token:" entry.
 #
 # == Tasks
 #
@@ -31,9 +57,9 @@ require 'tempfile'
 #   up in your EDITOR and runs travis-lint upon saving.  Does not allow you to
 #   save a bad .travis.yml.
 #
-# == Config
+# == Hoe Configuration
 #
-# The configuration is only used to generate the .travis.yml.  After you've
+# The Hoe configuration is used to generate the .travis.yml.  After you've
 # generated a .travis.yml you may any changes you wish to it and the following
 # defaults will not apply.  If you have multiple projects, setting up a common
 # custom configuration in ~/.hoerc can save you time.
@@ -48,6 +74,9 @@ require 'tempfile'
 #
 # script::
 #   Runs the travis rake task.
+#
+# token::
+#   Your travis-ci token.  See @Setup above
 #
 # versions::
 #   The versions of ruby used to run your tests.  Note that if you have
@@ -84,12 +113,17 @@ module Hoe::Travis
       'rake travis:before',
     ],
     'script' => 'rake travis',
+    'token' => 'FIX - See: ri Hoe::Travis',
     'versions' => %w[
       1.8.7
       1.9.2
       1.9.3
     ],
   }
+
+  def initialize_travis # :nodoc:
+    @github_api = URI 'https://api.github.com'
+  end
 
   ##
   # Adds travis tasks to rake
@@ -109,6 +143,11 @@ module Hoe::Travis
         abort unless check_travis_yml '.travis.yml'
       end
 
+      desc "Disables the travis-ci hook"
+      task :disable do
+        travis_disable
+      end
+
       desc "Brings .travis.yml up in your EDITOR then checks it on save"
       task :edit do
         Tempfile.open 'travis.yml' do |io|
@@ -119,6 +158,16 @@ module Hoe::Travis
 
           travis_yml_write io.path if ok
         end
+      end
+
+      desc "Enables the travis-ci hook"
+      task :enable do
+        travis_enable
+      end
+
+      desc "Triggers the travis-ci hook"
+      task :force do
+        travis_force
       end
 
       task :fake_config do
@@ -153,6 +202,58 @@ module Hoe::Travis
   end
 
   ##
+  # Disables travis-ci for this repository.
+
+  def travis_disable
+    user, repo, token = travis_github_check
+
+    if hook = travis_have_hook?(repo) then
+      travis_edit_hook repo, hook, false if hook['active']
+    end
+  end
+
+  ##
+  # Edits the travis +hook+ definition for +repo+ (from the github URL) to
+  # +enable+ (default) or disable it.
+
+  def travis_edit_hook repo, hook, enable = true
+    patch = unless Net::HTTP.const_defined? :Patch then
+              # Ruby 1.8
+              Class.new Net::HTTPRequest do |c|
+                c.const_set :METHOD, 'PATCH'
+                c.const_set :REQUEST_HAS_BODY, true
+                c.const_set :RESPONSE_HAS_BODY, true
+              end
+            else
+              Net::HTTP::Patch
+            end
+
+
+    id = hook['id']
+
+    body = {
+      'name'   => hook['name'],
+      'active' => enable,
+      'config' => hook['config']
+    }
+
+    travis_github_request "/repos/#{repo}/hooks/#{id}", body, patch
+  end
+
+  ##
+  # Enables travis-ci for this repository.
+
+  def travis_enable
+    user, repo, token = travis_github_check
+
+    if hook = travis_have_hook?(repo) then
+      travis_edit_hook repo, hook unless hook['active']
+    else
+      travis_make_hook repo, user, token
+    end
+  end
+
+  ##
   # Creates a fake config file for use on travis-ci.  Running this with a
   # pre-existing .hoerc has no effect.
 
@@ -166,6 +267,120 @@ module Hoe::Travis
     open fake_hoerc, 'w' do |io|
       YAML.dump config, io
     end
+  end
+
+  ##
+  # Forces the travis-ci hook
+
+  def travis_force
+    user, repo, token = travis_github_check
+
+    unless hook = travis_have_hook?(repo)
+      hook = travis_make_hook repo, user, token
+    end
+
+    travis_github_request "/repos/#{repo}/hooks/#{hook['id']}/test", {}
+  end
+
+  ##
+  # Ensures you have proper setup for editing the github travis hook
+
+  def travis_github_check
+    user = `git config github.user`.chomp
+    abort <<-ABORT unless user
+Set your github user and token in ~/.gitconfig
+
+See: ri Hoe::Travis and
+\thttp://help.github.com/set-your-user-name-email-and-github-token/
+    ABORT
+
+    `git config remote.origin.url` =~ /^git@github\.com:(.*).git$/
+    repo = $1
+
+    abort <<-ABORT unless repo
+Unable to determine your github repository.
+
+Expected \"git@github.com:[repo].git\" as your remote origin
+    ABORT
+
+    token = with_config do |config, _|
+      config['travis']['token']
+    end
+
+    abort 'Please set your travis token via `rake config_hoe` - ' \
+          'See: ri Hoe::Travis' if token =~ /FIX/
+
+    return user, repo, token
+  end
+
+  ##
+  # Makes a github request at +path+ with an optional +body+ Hash which will
+  # be sent as JSON.  The default +method+ without a body is a GET request,
+  # otherwise POST.
+
+  def travis_github_request(path, body = nil,
+                            method = body ? Net::HTTP::Post : Net::HTTP::Get)
+    begin
+      require 'json'
+    rescue LoadError => e
+      raise unless e.message.end_with? 'json'
+
+      abort 'Please gem install json like modern ruby versions have'
+    end
+
+    uri = @github_api + path
+
+    http = Net::HTTP.new uri.host, uri.port
+    http.use_ssl = uri.scheme.downcase == 'https'
+    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    http.cert_store = OpenSSL::X509::Store.new
+    http.cert_store.set_default_paths
+
+    req = method.new uri.request_uri
+    if body then
+      req.content_type = 'application/json'
+      req.body = JSON.dump body
+    end
+
+    user = `git config github.user`.chomp
+    pass = `git config github.password`.chomp
+    req.basic_auth user, pass
+
+    res = http.request req
+    body = JSON.parse res.body
+
+    raise "github API error #{res.code}: #{res['message']}" unless
+      Net::HTTPSuccess === res
+
+    body
+  end
+
+  ##
+  # Returns the github hook definition for the "travis" hook on +repo+ (from
+  # the github URL), if it exists.
+
+  def travis_have_hook? repo
+    body = travis_github_request "/repos/#{repo}/hooks"
+
+    body.find { |hook| hook['name'] == 'travis' }
+  end
+
+  ##
+  # Creates a travis hook for +user+ on the given +repo+ (from the github URL)
+  # that uses the users +token+.
+
+  def travis_make_hook repo, user, token
+    body = {
+      "name" => "travis",
+      "active" => true,
+      "config" => {
+        "domain" => "",
+        "token" => token,
+        "user" => user,
+      }
+    }
+
+    travis_github_request "/repos/#{repo}/hooks", body
   end
 
   ##

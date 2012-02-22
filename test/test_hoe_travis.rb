@@ -65,14 +65,19 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
   def test_travis_notifications_config
     Hoe::DEFAULT_CONFIG['travis']['notifications'] = {
-      'email' => %w[other@example]
+      'email' => %w[other@example],
+      'irc' => %w[irc.example#channel],
     }
 
     expected = {
-      'email' => %w[other@example]
+      'email' => %w[other@example],
+      'irc'   => %w[irc.example#channel],
     }
 
-    assert_equal expected, @hoe.travis_notifications
+    Dir.mktmpdir do |dir|
+      ENV['HOME'] = dir
+      assert_equal expected, @hoe.travis_notifications
+    end
   ensure
     Hoe::DEFAULT_CONFIG['travis'].delete 'notifications'
   end
