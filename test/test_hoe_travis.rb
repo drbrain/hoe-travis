@@ -24,11 +24,6 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     ENV['HOME']   = @home
   end
 
-  def test_have_gem_eh
-    assert @hoe.have_gem? 'hoe'
-    refute @hoe.have_gem? 'nonexistent'
-  end
-
   def test_travis_before_script
     expected = @hoe.with_config do |config, _|
       config['travis']['before_script']

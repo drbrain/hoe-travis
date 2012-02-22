@@ -189,12 +189,6 @@ module Hoe::Travis
     end
   end
 
-  def have_gem? name # :nodoc:
-    Gem::Specification.find_by_name name
-  rescue Gem::LoadError
-    return false
-  end
-
   ##
   # Extracts the travis before_script from your .hoerc
 
