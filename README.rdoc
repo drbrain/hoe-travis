@@ -11,24 +11,26 @@ http://travis-ci.org.  The plugin contains a <code>.travis.yml</code>
 generator and a pre-defined rake task which runs the tests and ensures your
 manifest file is correct.
 
-With hoe-travis, additional checks and setup can be added with
-locally-verifiable rake tasks instead of committing and pushing a change,
-waiting for travis to run your tests, then trying a new commit if you didn't
-fix the problem.
+With hoe-travis it is easy to add additional checks.  Custom checks can be
+easily verified locally by simply running a rake task instead of committing
+and pushing a change, waiting for travis to run your tests, then trying a new
+commit if you didn't fix the problem.
 
 == Features
 
 * .travis.yml generation task
 * Pre-defined rake tasks which are run by travis-ci
-* Easy to hook up rake tasks for additional travis-ci setup and checks
+* Easy to hook up rake tasks for additional travis-ci setup or checks
 
-== Install
+== Getting Started
+
+If you're not already using Hoe with your project, see: http://docs.seattlerb.org/hoe/Hoe.pdf
+
+To get started with hoe-travis, first install it:
 
   sudo gem install hoe-travis
 
-== Synopsis
-
-Add hoe-travis as a plugin to your Rakefile:
+Then add hoe-travis as a plugin to your Rakefile:
 
   Hoe.plugin :travis
 

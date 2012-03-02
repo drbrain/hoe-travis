@@ -31,7 +31,8 @@ require 'uri'
 # http://travis-ci.org/profile underneath your github username and email
 # address.
 #
-# To set this in your hoerc run `rake config_hoe` and edit the "token:" entry.
+# To set this in your hoerc run <code>rake config_hoe</code> and edit the
+# "token:" entry.
 #
 # == Tasks
 #
@@ -57,6 +58,18 @@ require 'uri'
 #   Generates a .travis.yml based on your Hoe spec and .hoerc then brings it
 #   up in your EDITOR and runs travis-lint upon saving.  Does not allow you to
 #   save a bad .travis.yml.
+#
+# travis:enable::
+#   Enables the travis hook on github.com.  Requires further setup as
+#   described below.
+#
+# travis:disable::
+#   Disables the travis hook on github.com.  Requires further setup as
+#   described below.
+#
+# travis:force::
+#   Forces a travis-ci run, equivalent to clicking the "test" button on the
+#   travis-ci hook page.
 #
 # == Hoe Configuration
 #
