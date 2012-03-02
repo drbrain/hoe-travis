@@ -101,7 +101,11 @@ module Hoe::Travis
   VERSION = '1.0'
 
   YAML_EXCEPTIONS = if defined?(Psych) then # :nodoc:
-                      [Psych::Exception, Psych::SyntaxError]
+                      if Psych.const_defined? :Exception then
+                        [Psych::SyntaxError] # Ruby 1.9.2
+                      else
+                        [Psych::Exception, Psych::SyntaxError]
+                      end
                     else
                       [YAML::Error]
                     end
