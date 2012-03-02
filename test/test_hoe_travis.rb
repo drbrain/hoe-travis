@@ -25,9 +25,10 @@ class TestHoeTravis < MiniTest::Unit::TestCase
   end
 
   def test_travis_before_script
-    expected = @hoe.with_config do |config, _|
-      config['travis']['before_script']
-    end
+    expected = [
+      'gem install hoe-travis --no-rdoc --no-ri',
+      'rake travis:before',
+    ]
 
     assert_equal expected, @hoe.travis_before_script
   end
@@ -75,6 +76,13 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     end
   ensure
     Hoe::DEFAULT_CONFIG['travis'].delete 'notifications'
+  end
+
+  def test_travis_script
+    expected = 'rake travis'
+
+
+    assert_equal expected, @hoe.travis_script
   end
 
   def test_travis_versions
@@ -172,7 +180,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 ---
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
-- rake travis:before -t
+- rake travis:before
 language: ruby
 notifications:
   email:
@@ -181,7 +189,7 @@ rvm:
 - 1.8.7
 - 1.9.2
 - 1.9.3
-script: rake travis -t
+script: rake travis
         TRAVIS_YML
 
         assert_equal expected, travis_yml

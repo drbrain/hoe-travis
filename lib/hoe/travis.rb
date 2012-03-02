@@ -128,9 +128,9 @@ module Hoe::Travis
   Hoe::DEFAULT_CONFIG['travis'] = {
     'before_script' => [
       'gem install hoe-travis --no-rdoc --no-ri',
-      'rake travis:before -t',
+      'rake travis:before',
     ],
-    'script' => 'rake travis -t',
+    'script' => 'rake travis',
     'token' => 'FIX - See: ri Hoe::Travis',
     'versions' => %w[
       1.8.7
@@ -211,7 +211,10 @@ module Hoe::Travis
   # Extracts the travis before_script from your .hoerc
 
   def travis_before_script
-    with_config { |config, _| config['travis']['before_script'] }
+    with_config { |config, _|
+      config['travis']['before_script'] or
+        Hoe::DEFAULT_CONFIG['travis']['before_script']
+    }
   end
 
   ##
@@ -411,10 +414,21 @@ Expected \"git@github.com:[repo].git\" as your remote origin
 
     default_notifications = { 'email' => email }
     notifications = with_config do |config, _|
-      config['travis']['notifications']
+      config['travis']['notifications'] or
+        Hoe::DEFAULT_CONFIG['travis']['notifications']
     end || {}
 
     default_notifications.merge notifications
+  end
+
+  ##
+  # Extracts the travis script from your .hoerc
+
+  def travis_script
+    with_config { |config, _|
+      config['travis']['script'] or
+        Hoe::DEFAULT_CONFIG['travis']['script']
+    }
   end
 
   ##
@@ -431,7 +445,8 @@ Expected \"git@github.com:[repo].git\" as your remote origin
       end
     else
       with_config do |config, _|
-        config['travis']['versions']
+        config['travis']['versions'] or
+          Hoe::DEFAULT_CONFIG['travis']['versions']
       end
     end.sort
   end
@@ -496,7 +511,7 @@ Expected \"git@github.com:[repo].git\" as your remote origin
       'language'      => 'ruby',
       'notifications' => travis_notifications,
       'rvm'           => travis_versions,
-      'script'        => 'rake travis'
+      'script'        => travis_script,
     }
 
     travis_yml.each do |key, value|
