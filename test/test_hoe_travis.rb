@@ -172,7 +172,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 ---
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
-- rake travis:before
+- rake travis:before -t
 language: ruby
 notifications:
   email:
@@ -181,7 +181,7 @@ rvm:
 - 1.8.7
 - 1.9.2
 - 1.9.3
-script: rake travis
+script: rake travis -t
         TRAVIS_YML
 
         assert_equal expected, travis_yml

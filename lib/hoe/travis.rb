@@ -218,7 +218,7 @@ module Hoe::Travis
   # Disables travis-ci for this repository.
 
   def travis_disable
-    user, repo, token = travis_github_check
+    _, repo, = travis_github_check
 
     if hook = travis_have_hook?(repo) then
       travis_edit_hook repo, hook, false if hook['active']
