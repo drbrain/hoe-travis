@@ -1,6 +1,7 @@
 require 'hoe'
 require 'tempfile'
 require 'net/http'
+require 'net/https' # for Ruby 1.8
 require 'uri'
 
 ##
@@ -342,10 +343,14 @@ Expected \"git@github.com:[repo].git\" as your remote origin
     req.basic_auth user, pass
 
     res = http.request req
-    body = JSON.parse res.body
 
-    raise "github API error #{res.code}: #{res['message']}" unless
-      Net::HTTPSuccess === res
+    body = JSON.parse res.body if res.class.body_permitted?
+
+    unless Net::HTTPSuccess === res then
+      message = ": #{res['message']}" if body
+
+      raise "github API error #{res.code}#{message}"
+    end
 
     body
   end
