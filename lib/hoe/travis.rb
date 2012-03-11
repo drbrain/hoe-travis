@@ -131,7 +131,7 @@ module Hoe::Travis
       'rake travis:before -t',
     ],
     'after_script' => [
-      'rake check_manifest', # separate step so clean and generate work
+      'rake travis:after -t',
     ],
     'script' => 'rake travis',
     'token' => 'FIX - See: ri Hoe::Travis',
@@ -156,6 +156,7 @@ module Hoe::Travis
     namespace :travis do
       desc "Run by travis-ci after running the default checks"
       task :after => %w[
+        travis:fake_config
         check_manifest
       ]
 

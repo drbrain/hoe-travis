@@ -33,7 +33,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     assert_equal %w[test], travis.prerequisites
 
     after       = Rake::Task['travis:after']
-    assert_equal %w[check_manifest], after.prerequisites
+    assert_equal %w[travis:fake_config check_manifest], after.prerequisites
 
     before      = Rake::Task['travis:before']
     assert_equal %w[install_plugins check_extra_deps], before.prerequisites
@@ -62,7 +62,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
   def test_travis_after_script
     expected = [
-      'rake check_manifest',
+      'rake travis:after -t',
     ]
 
     assert_equal expected, @hoe.travis_after_script
@@ -223,7 +223,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
         expected = YAML.load <<-TRAVIS_YML
 ---
 after_script:
-- rake check_manifest
+- rake travis:after -t
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
 - rake travis:before -t
