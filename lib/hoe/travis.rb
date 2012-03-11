@@ -111,7 +111,7 @@ module Hoe::Travis
   ##
   # This version of Hoe::Travis
 
-  VERSION = '1.0'
+  VERSION = '1.1'
 
   YAML_EXCEPTIONS = if defined?(Psych) then # :nodoc:
                       if Psych.const_defined? :Exception then
@@ -128,7 +128,10 @@ module Hoe::Travis
   Hoe::DEFAULT_CONFIG['travis'] = {
     'before_script' => [
       'gem install hoe-travis --no-rdoc --no-ri',
-      'rake travis:before',
+      'rake travis:before -t',
+    ],
+    'after_script' => [
+      'rake check_manifest', # separate step so clean and generate work
     ],
     'script' => 'rake travis',
     'token' => 'FIX - See: ri Hoe::Travis',
@@ -148,13 +151,18 @@ module Hoe::Travis
 
   def define_travis_tasks
     desc "Runs your tests for travis"
-    task :travis => %w[test travis:fake_config check_manifest]
+    task :travis => %w[test]
 
     namespace :travis do
-      desc "Run by travis-ci before your running the default checks"
+      desc "Run by travis-ci after running the default checks"
+      task :after => %w[
+        check_manifest
+      ]
+
+      desc "Run by travis-ci before running the default checks"
       task :before => %w[
-        check_extra_deps
         install_plugins
+        check_extra_deps
       ]
 
       desc "Runs travis-lint on your .travis.yml"
@@ -205,6 +213,16 @@ module Hoe::Travis
         end
       end
     end
+  end
+
+  ##
+  # Extracts the travis after_script from your .hoerc
+
+  def travis_after_script
+    with_config { |config, _|
+      config['travis']['after_script'] or
+        Hoe::DEFAULT_CONFIG['travis']['after_script']
+    }
   end
 
   ##
@@ -507,6 +525,7 @@ Expected \"git@github.com:[repo].git\" as your remote origin
 
   def travis_yml_generate
     travis_yml = {
+      'after_script'  => travis_after_script,
       'before_script' => travis_before_script,
       'language'      => 'ruby',
       'notifications' => travis_notifications,

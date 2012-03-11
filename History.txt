@@ -1,4 +1,15 @@
-=== 1.0 / 2012-02-15
+=== 1.1 / 2012-03-11
+
+* Minor enhancement
+  * Added after_script support to .travis.yml and a travis:after task to check
+    it manually.
+
+* Bug fix
+  * The check_manifest task is now run separately as an after_script to avoid
+    pollution from generated files.  Run <tt>rake travis:generate</tt> to
+    replace your generated .travis.yml.
+
+=== 1.0 / 2012-03-02
 
 * Major enhancements
   * Birthday!

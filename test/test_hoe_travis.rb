@@ -6,6 +6,8 @@ require 'fileutils'
 class TestHoeTravis < MiniTest::Unit::TestCase
 
   def setup
+    Rake.application.clear
+
     @hoe = Hoe.spec "blah" do
       developer 'author', 'email@example'
       developer 'silent', ''
@@ -24,10 +26,52 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     ENV['HOME']   = @home
   end
 
+  def test_define_travis_tasks
+    @hoe.define_travis_tasks
+
+    travis = Rake::Task['travis']
+    assert_equal %w[test], travis.prerequisites
+
+    after       = Rake::Task['travis:after']
+    assert_equal %w[check_manifest], after.prerequisites
+
+    before      = Rake::Task['travis:before']
+    assert_equal %w[install_plugins check_extra_deps], before.prerequisites
+
+    check       = Rake::Task['travis:check']
+    assert_empty check.prerequisites
+
+    disable     = Rake::Task['travis:disable']
+    assert_empty disable.prerequisites
+
+    edit        = Rake::Task['travis:edit']
+    assert_empty edit.prerequisites
+
+    enable      = Rake::Task['travis:enable']
+    assert_empty enable.prerequisites
+
+    force       = Rake::Task['travis:force']
+    assert_empty force.prerequisites
+
+    fake_config = Rake::Task['travis:fake_config']
+    assert_empty fake_config.prerequisites
+
+    generate    = Rake::Task['travis:generate']
+    assert_empty generate.prerequisites
+  end
+
+  def test_travis_after_script
+    expected = [
+      'rake check_manifest',
+    ]
+
+    assert_equal expected, @hoe.travis_after_script
+  end
+
   def test_travis_before_script
     expected = [
       'gem install hoe-travis --no-rdoc --no-ri',
-      'rake travis:before',
+      'rake travis:before -t',
     ]
 
     assert_equal expected, @hoe.travis_before_script
@@ -178,9 +222,11 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
         expected = YAML.load <<-TRAVIS_YML
 ---
+after_script:
+- rake check_manifest
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
-- rake travis:before
+- rake travis:before -t
 language: ruby
 notifications:
   email:
