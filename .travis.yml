@@ -1,6 +1,6 @@
 ---
 after_script:
-- rake check_manifest
+- rake travis:after -t
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
 - rake travis:before -t
