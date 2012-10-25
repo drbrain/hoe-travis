@@ -1,3 +1,13 @@
+=== 1.2 / 2012-10-24
+
+* Minor enhancement
+  * hoe-travis now depends on hoe ~> 3.0
+
+=== 1.1.1 / 2012-05-17
+
+* Bug fix
+  * Updated hoe dependency to work with hoe 3
+
 === 1.1 / 2012-03-11
 
 * Minor enhancement
