@@ -54,7 +54,7 @@ If you would like to make future changes to your .travis.yml you can run:
 
 Which, like <code>travis:generate</code>, will bring up your EDITOR with your
 .travis.yml.  When you've saved the file the changes will be checked by
-travis-lint before writing back to .travis.yml and give you a chance to
+Travis's /lint API before writing back to .travis.yml and give you a chance to
 correct them.
 
 If you've edited your .travis.yml by hand you can run:

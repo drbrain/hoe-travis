@@ -169,7 +169,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
   def test_travis_yml_check_invalid
     Tempfile.open 'travis' do |io|
-      io.write "---\nlanguage: ruby\n"
+      io.write "---\nlangage: ruby\n"
       io.rewind
 
       out, err = capture_io do

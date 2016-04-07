@@ -48,16 +48,16 @@ require 'uri'
 #   development dependencies.
 #
 # travis:check::
-#   Runs travis-lint against your .travis.yml.
+#   Lints your .travis.yml.
 #
 # travis:edit::
-#   Pulls up your .travis.yml in your EDITOR and runs travis-lint upon saving.
-#   Does not allow you to save a bad .travis.yml.
+#   Pulls up your .travis.yml in your EDITOR and lints your configuration upon
+#   saving.  Does not allow you to save a bad .travis.yml.
 #
 # travis:generate::
 #   Generates a .travis.yml based on your Hoe spec and .hoerc then brings it
-#   up in your EDITOR and runs travis-lint upon saving.  Does not allow you to
-#   save a bad .travis.yml.
+#   up in your EDITOR and lints upon saving.  Does not allow you to save a bad
+#   .travis.yml.
 #
 # travis:enable::
 #   Enables the travis hook on github.com.  Requires further setup as
@@ -166,7 +166,7 @@ module Hoe::Travis
         check_extra_deps
       ]
 
-      desc "Runs travis-lint on your .travis.yml"
+      desc "Lint your .travis.yml"
       task :check do
         abort unless check_travis_yml '.travis.yml'
       end
@@ -471,35 +471,68 @@ Expected \"git@github.com:[repo].git\" as your remote origin
   end
 
   ##
-  # Runs travis-lint against the travis.yml in +path+.  If the file is OK true
-  # is returned, otherwise the issues are displayed on $stderr and false is
-  # returned.
+  # Submits the travis.yml in +path+ to travis-ci.org for linting.  If the
+  # file is OK true is returned, otherwise the issues are displayed on $stderr
+  # and false is returned.
 
   def travis_yml_check path
-    require 'travis/lint'
+    require 'net/http'
 
-    travis_yml = YAML.load_file path
+    post_body = {
+      'content' => File.read(path),
+    }
 
-    issues = Travis::Lint::Linter.validate travis_yml
+    req = Net::HTTP::Post.new '/lint'
+    req.set_form post_body, 'multipart/form-data'
 
-    return true if issues.empty?
+    cert_store = OpenSSL::X509::Store.new
+    cert_store.set_default_paths
 
-    issues.each do |issue|
-      warn "There is an issue with the key #{issue[:key].inspect}:"
-      warn "\t#{issue[:issue]}"
+    http = Net::HTTP.new 'api.travis-ci.org', 443
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    http.cert_store = cert_store
+
+    res = http.request req
+
+    unless Net::HTTPOK === res then
+      warn "Unable to lint #{path}: #{res.body}"
+
+      return false
     end
 
-    false
-  rescue *YAML_EXCEPTIONS => e
-    warn "invalid YAML in travis.yml file at #{path}: #{e.message}"
+    require 'json'
+
+    response = JSON.parse res.body
+
+    lint     = response.fetch 'lint'
+    warnings = lint.fetch 'warnings'
+
+    return true if warnings.empty?
+
+    warnings.each do |warning|
+      keys    = warning.fetch 'key'
+      message = warning.fetch 'message'
+
+      if keys.empty? then
+        warn message
+      else
+        warn "For #{keys.join ', '}: #{message}"
+      end
+    end
+
+    return false
+
+  rescue Net::HTTPError => e
+    warn "Unable to lint #{path}: #{e.message}"
 
     return false
   end
 
   ##
   # Loads the travis.yml in +path+ in your EDITOR (or vi if unset).  Upon
-  # saving the travis.yml is checked with travis-lint.  If any problems are
-  # found you will be asked to retry the edit.
+  # saving the travis.yml is checked by linting.  If any problems are found
+  # you will be asked to retry the edit.
   #
   # If the edited travis.yml is OK true is returned, otherwise false.
 
