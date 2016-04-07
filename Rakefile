@@ -15,6 +15,8 @@ Hoe.spec 'hoe-travis' do
 
   rdoc_locations << 'docs.seattlerb.org:/data/www/docs.seattlerb.org/hoe-travis/'
 
+  license 'MIT'
+
   # this explicit dependency is so `gem install hoe-travis` will fetch
   # hoe and rake, simplifying the before_script command list
   self.extra_deps << ['hoe', '~> 3.0']

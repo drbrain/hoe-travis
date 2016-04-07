@@ -12,6 +12,8 @@ class TestHoeTravis < MiniTest::Unit::TestCase
       developer 'author', 'email@example'
       developer 'silent', ''
 
+      license 'MIT'
+
       self.readme_file = 'README.rdoc'
     end
 
