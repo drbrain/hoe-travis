@@ -111,7 +111,7 @@ module Hoe::Travis
   ##
   # This version of Hoe::Travis
 
-  VERSION = '1.2'
+  VERSION = '1.3'
 
   YAML_EXCEPTIONS = if defined?(Psych) then # :nodoc:
                       if Psych.const_defined? :Exception then
