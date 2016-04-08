@@ -134,7 +134,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
   def test_travis_versions
     def @hoe.have_gem?(name) false end
 
-    assert_equal %w[1.8.7 1.9.2 1.9.3], @hoe.travis_versions
+    assert_equal %w[2.1.0 2.2.0 2.3.0], @hoe.travis_versions
   end
 
   def test_travis_versions_multiruby
@@ -156,13 +156,13 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     Dir.mktmpdir do |path|
       ENV['HOME'] = path
 
-      assert_equal %w[1.8.7 1.9.2 1.9.3], @hoe.travis_versions
+      assert_equal %w[2.1.0 2.2.0 2.3.0], @hoe.travis_versions
     end
   end
 
   def test_travis_yml_check
     Tempfile.open 'travis' do |io|
-      io.write "---\nlanguage: ruby\nrvm:\n  - 1.8.7\n"
+      io.write "---\nlanguage: ruby\nrvm:\n  - 2.1.0\n"
       io.rewind
 
       assert @hoe.travis_yml_check io.path
@@ -188,13 +188,13 @@ class TestHoeTravis < MiniTest::Unit::TestCase
       ENV['EDITOR'] = "cat > #{out_io.path} < "
 
       Tempfile.open 'travis' do |io|
-        io.write "---\nlanguage: ruby\nrvm:\n  - 1.8.7\n"
+        io.write "---\nlanguage: ruby\nrvm:\n  - 2.1.0\n"
         io.rewind
 
         @hoe.travis_yml_edit io.path
       end
 
-      assert_equal "---\nlanguage: ruby\nrvm:\n  - 1.8.7\n", out_io.read
+      assert_equal "---\nlanguage: ruby\nrvm:\n  - 2.1.0\n", out_io.read
     end
   end
 
@@ -234,9 +234,9 @@ notifications:
   email:
   - email@example
 rvm:
-- 1.8.7
-- 1.9.2
-- 1.9.3
+- 2.1.0
+- 2.2.0
+- 2.3.0
 script: rake travis
         TRAVIS_YML
 
