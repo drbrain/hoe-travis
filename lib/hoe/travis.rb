@@ -95,7 +95,7 @@ require 'uri'
 # versions::
 #   The versions of ruby used to run your tests.  Note that if you have
 #   multiruby installed, your installed versions will be preferred over the
-#   defaults of ruby 1.8.7, 1.9.2 and 1.9.3.
+#   defaults that come with hoe-travis.
 #
 # In your .hoerc you may provide a "notifications" key such as:
 #
@@ -136,9 +136,9 @@ module Hoe::Travis
     'script' => 'rake travis',
     'token' => 'FIX - See: ri Hoe::Travis',
     'versions' => %w[
-      1.8.7
-      1.9.2
-      1.9.3
+      2.1.0
+      2.2.0
+      2.3.0
     ],
   }
 
