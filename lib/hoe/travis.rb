@@ -151,13 +151,12 @@ module Hoe::Travis
 
   def define_travis_tasks
     desc "Runs your tests for travis"
-    task :travis => %w[test]
+    task :travis => %w[test check_manifest]
 
     namespace :travis do
       desc "Run by travis-ci after running the default checks"
       task :after => %w[
         travis:fake_config
-        check_manifest
       ]
 
       desc "Run by travis-ci before running the default checks"
@@ -587,4 +586,3 @@ Expected \"git@github.com:[repo].git\" as your remote origin
   end
 
 end
-

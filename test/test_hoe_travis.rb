@@ -32,10 +32,10 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     @hoe.define_travis_tasks
 
     travis = Rake::Task['travis']
-    assert_equal %w[test], travis.prerequisites
+    assert_equal %w[test check_manifest], travis.prerequisites
 
     after       = Rake::Task['travis:after']
-    assert_equal %w[travis:fake_config check_manifest], after.prerequisites
+    assert_equal %w[travis:fake_config], after.prerequisites
 
     before      = Rake::Task['travis:before']
     assert_equal %w[install_plugins check_extra_deps], before.prerequisites
@@ -260,4 +260,3 @@ script: rake travis
   end
 
 end
-
