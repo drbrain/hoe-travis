@@ -167,7 +167,7 @@ module Hoe::Travis
 
       desc "Lint your .travis.yml"
       task :check do
-        abort unless check_travis_yml '.travis.yml'
+        abort unless travis_yml_check '.travis.yml'
       end
 
       desc "Disables the travis-ci hook"
