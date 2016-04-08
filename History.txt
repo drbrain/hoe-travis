@@ -1,3 +1,9 @@
+=== 1.3 / 2016-04-08
+
+* Minor enhancement
+  * check_manifest is run after tests now, so missing files cause travis
+    failures.  Pull request #1 by Samuel Giddins.
+
 === 1.2 / 2012-10-24
 
 * Minor enhancement
