@@ -111,7 +111,7 @@ module Hoe::Travis
   ##
   # This version of Hoe::Travis
 
-  VERSION = '1.3'
+  VERSION = '1.3.1'
 
   YAML_EXCEPTIONS = if defined?(Psych) then # :nodoc:
                       if Psych.const_defined? :Exception then
@@ -162,7 +162,7 @@ module Hoe::Travis
       desc "Run by travis-ci before running the default checks"
       task :before => %w[
         install_plugins
-        check_extra_deps
+        travis:install_deps
       ]
 
       desc "Lint your .travis.yml"
@@ -210,6 +210,18 @@ module Hoe::Travis
           ok = travis_yml_edit io.path
 
           travis_yml_write io.path if ok
+        end
+      end
+
+      task :install_deps do
+        (extra_deps + extra_dev_deps).each do |dep|
+          begin
+            gem(*dep)
+          rescue Gem::LoadError
+            name, req, = dep
+
+            install_gem name, req, false
+          end
         end
       end
     end
