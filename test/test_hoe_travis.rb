@@ -38,7 +38,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
     assert_equal %w[travis:fake_config], after.prerequisites
 
     before      = Rake::Task['travis:before']
-    assert_equal %w[install_plugins check_extra_deps], before.prerequisites
+    assert_equal %w[install_plugins travis:install_deps], before.prerequisites
 
     check       = Rake::Task['travis:check']
     assert_empty check.prerequisites
@@ -72,7 +72,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 
   def test_travis_before_script
     expected = [
-      'gem install hoe-travis --no-rdoc --no-ri',
+      'gem install hoe-travis --no-document',
       'rake travis:before -t',
     ]
 
@@ -227,7 +227,7 @@ class TestHoeTravis < MiniTest::Unit::TestCase
 after_script:
 - rake travis:after -t
 before_script:
-- gem install hoe-travis --no-rdoc --no-ri
+- gem install hoe-travis --no-document
 - rake travis:before -t
 language: ruby
 notifications:

@@ -127,7 +127,7 @@ module Hoe::Travis
 
   Hoe::DEFAULT_CONFIG['travis'] = {
     'before_script' => [
-      'gem install hoe-travis --no-rdoc --no-ri',
+      'gem install hoe-travis --no-document',
       'rake travis:before -t',
     ],
     'after_script' => [
