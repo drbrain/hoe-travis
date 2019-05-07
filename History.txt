@@ -1,3 +1,10 @@
+=== 1.4.1 / 2019-05-06
+
+Bug fix:
+
+* Workaround Hoe::Package#install_gem not working with RubyGems 3 until
+  https://github.com/seattlerb/hoe/pull/89 is released.
+
 === 1.4 / 2019-05-06
 
 Minor enhancement:
